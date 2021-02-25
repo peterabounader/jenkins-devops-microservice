@@ -33,6 +33,36 @@ pipeline {
 			}
 				
 		}
+
+		stage('Build docker image') {
+			steps {
+				//"docker build -t abounader10/currency-exchange-devops:$env.BUILD_TAG"
+				script {
+					dockerImage = docker.build("abounader10/currency-exchange-devops:${env.BUILD_TAG}")
+				}
+			}
+				
+		}
+
+		stage('Push docker image') {
+			steps {
+				script {
+					docker.withRegistry('','dockerHub') {
+						dockerImage.Push();
+						dockerImage.Push('latest');
+					}
+					
+				}
+			}
+				
+		}
+
+		stage('Package') {
+			steps {
+				sh "mvn package -DskipTests"
+			}
+				
+		}
 	} 
 	post {
 		always {
